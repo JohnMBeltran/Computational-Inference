@@ -1,31 +1,83 @@
 ---
-title: "Stat-Inference Main Output"
 output: pdf_document
+geometry: "left=2cm,right=2cm,top=2cm,bottom=2cm"
+fontsize: 10pt
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-install.packages("tidyverse")
-library(tidyverse)
-
+#install.packages("tidyverse")
+require(tidyverse)
 ```
 
-## R Markdown
+#### Introduction:
+The file \Verb#supernovae_mth3028.csv# contains velocity (Mpc/Ga) and distance (Mpc) data about 36 Type 1A supernovae. Let $y_i$ and $x_i$ denote the velocity and distance of a supernova, respectively. The velocity is to be modeled as: $Y_i=\beta x_i +\epsilon_i$, with density function: $$f(y_i;\beta,\tau)=(2\pi e^\tau)^{-\frac{1}{2}}e^{-\frac{1}{2}e^{-\tau}(y_i-\beta x_i)^2}$$where $\beta$ and $\tau$ are parameters. Let $\gamma=1/\beta$.
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+## Question 1: Prelims
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+a) We begin by visualizing the the speed and distance of the 36 supernovae. We also conduct some data wrangling to suit the needs of the study; transforming the string list to numeric data. 
+```{r q1.1, out.width="90%"}
+supern <- read.csv(file="supernovae_mth3028.csv", header=FALSE)[2:37,] # Only Relevant Data
+super <- data.frame(matrix(as.numeric(unlist(supern)), nrow=36, ncol=2)) # Numeric data frame
+colnames(super) <- c("velocity", "distance")
+plot(super$distance, super$velocity, main="36 Type 1A Supernovae Data",
+     xlab="Distance, Megaparsecs (Mpc)",ylab="Velocity, Megaparsecs/bn-years (Mpc/Ga)", 
+     xlim=c(0, max(super$distance)*1.05), ylim=c(0,max(super$velocity)*1.05), pch=3)
+grid(lwd = 0.75); axis(1)
 ```
 
-## Including Plots
+b) The quantity $\gamma$ can be interpreted as the age of the universe as is defines
 
-You can also embed plots, for example:
+\newpage
+## Question 2: Likelihood Function
+Here we derive the likelihood function, and its relevant log derivatives.
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
+a) For the likelihood function, $L(\beta,\tau; {\bf{y}})$, we suppose all $y_i$ are independently and identically distributed, with density function $f(y_i; \beta,\tau)$:
+\begin{eqnarray*}L(\beta,\tau; {\bf{y}})&=&\prod_{i=1}^n (2\pi e^\tau)^{-\frac{1}{2}}e^{-\frac{1}{2}e^{-\tau}(y_i-\beta x_i)^2} 
+\end{eqnarray*}
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+b) Log-Likelihood, $l(\beta,\tau)=\log\left[L(\beta,\tau; {\bf{y}})\right]$
+\begin{eqnarray*}l(\beta,\tau)&=&
+\sum_{i=1}^n \log\left[(2\pi e^\tau)^{-\frac{1}{2}}e^{-\frac{1}{2}e^{-\tau}(y_i-\beta x_i)^2}\right] \\
+&=& -\frac{n}{2}\left[\log(2\pi)+\tau\right]-\frac{e^{-\tau}}{2}\sum_{i=1}^n \left[y_i^2-2\beta x_i y_i +\beta^2 x_i^2 \right]
+\end{eqnarray*}
+
+c) Score function $U(\beta,\tau)=\left(\frac{\partial l(\beta,\tau)}{\partial\beta}, \frac{\partial  l(\beta,\tau)}{\partial \tau}\right)$, where
+\begin{eqnarray*}\frac{\partial}{\partial\beta}l(\beta,\tau)&=&
+-\frac{ e^{-\tau}}{2}\sum_{i=1}^n \left[2\beta X_i^2 -2X_i Y_i\right]\\
+\frac{\partial}{\partial\tau}l(\beta,\tau)&=& -\frac{n}{2}+\frac{e^{-\tau}}{2}\sum_{i=1}^n \left[Y_i^2-2\beta X_i Y_i +\beta^2 x_i^2 \right]
+\end{eqnarray*}
+
+d) Observed Information $J(\beta, \tau)$, where
+\begin{eqnarray*}
+J(\beta, \tau) &=&
+\begin{bmatrix}
+-\frac{\partial^2 l}{\partial\beta^2} \ -\frac{\partial^2 l}{\partial\beta\partial\tau} \\
+-\frac{\partial^2 l}{\partial\beta\partial\tau} \ -\frac{\partial^2 l}{\partial\tau^2}
+\end{bmatrix} \\
+\frac{\partial^2 l}{\partial\beta^2}&=& -e^{-\tau}\sum_{i=1}^n x_i^2 \\
+\frac{\partial^2 l}{\partial\beta\partial\tau} &=& \frac{ e^{-\tau}}{2}\sum_{i=1}^n \left[2\beta x_i^2 -2x_i Y_i\right]\\
+\frac{\partial^2 l}{\partial\tau^2} &=& -\frac{e^{-\tau}}{2}\sum_{i=1}^n \left[Y_i^2-2\beta x_i Y_i +\beta^2 Y_i^2 \right]
+\end{eqnarray*}
+
+e) Expected Information $I(\beta, \tau)=E\left[J\left(\beta,\tau\right)\right]$:
+\begin{eqnarray*}I(\beta, \tau) &=&\begin{bmatrix}
+-E\left[\frac{\partial^2 l}{\partial\beta^2}\right] \ -E\left[\frac{\partial^2 l}{\partial\beta\partial\tau}\right] \\
+-E\left[\frac{\partial^2 l}{\partial\beta\partial\tau}\right] \ -E\left[\frac{\partial^2 l}{\partial\tau^2}\right]
+\end{bmatrix} \\
+&=& 
+\end{eqnarray*}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
