@@ -7,11 +7,12 @@ fontsize: 10pt
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 #install.packages("tidyverse")
-require(tidyverse)
 ```
-
+```{r setup2, message=FALSE, warning=FALSE, fig.align="center"}
+require(tidyverse); set.seed(3028)
+```
 #### Introduction:
-The file \Verb#supernovae_mth3028.csv# contains velocity (Mpc/Ga) and distance (Mpc) data about 36 Type 1A supernovae. Let $y_i$ and $x_i$ denote the velocity and distance of a supernova, respectively. The velocity is to be modeled as: $Y_i=\beta x_i +\epsilon_i$, with density function: $$f(y_i;\beta,\tau)=(2\pi e^\tau)^{-\frac{1}{2}}e^{-\frac{1}{2}e^{-\tau}(y_i-\beta x_i)^2}$$where $\beta$ and $\tau$ are parameters. Let $\gamma=1/\beta$.
+The file \Verb#supernovae_mth3028.csv# contains velocity (Mpc/Ga) and distance (Mpc) data about 36 Type 1A supernovae. Let $y_i$ and $x_i$ denote the velocity and distance of a supernova, respectively. The velocity is to be modelled as: $Y_i=\beta x_i +\epsilon_i$, with density function: $$f(y_i;\beta,\tau)=(2\pi e^\tau)^{-\frac{1}{2}}e^{-\frac{1}{2}e^{-\tau}(y_i-\beta x_i)^2}$$where $\beta$ and $\tau$ are parameters. Let $\gamma=1/\beta$.
 
 ## Question 1: Prelims
 
@@ -21,31 +22,33 @@ supern <- read.csv(file="supernovae_mth3028.csv", header=FALSE)[2:37,] # Only Re
 super <- data.frame(matrix(as.numeric(unlist(supern)), nrow=36, ncol=2)) # Numeric data frame
 colnames(super) <- c("velocity", "distance")
 plot(super$distance, super$velocity, main="36 Type 1A Supernovae Data",
-     xlab="Distance, Megaparsecs (Mpc)",ylab="Velocity, Megaparsecs/bn-years (Mpc/Ga)", 
+     xlab="Distance (Mpc)",ylab="Velocity (Mpc/Ga)", 
      xlim=c(0, max(super$distance)*1.05), ylim=c(0,max(super$velocity)*1.05), pch=3)
 grid(lwd = 0.75); axis(1)
 ```
 
-b) The quantity $\gamma$ can be interpreted as the age of the universe as is defines
+b) The quantity $\gamma$ can be interpreted as the age of the universe:
+The velocity of the i$^{th}$ star ($y_i$) is linearly related to the distance of teh star ($x_i$). When travelling at constant velocity yi, the time it takes to travel distance xi is equal to $x_i/y_i$ . Due to the linear relationship, this fraction is the same for each star,
+namely $\gamma$ . Thus, the observations suggest that all stars have have moved from an original point ($x=0$) at the same initial time, $\gamma$ years ago.
 
 \newpage
 ## Question 2: Likelihood Function
 Here we derive the likelihood function, and its relevant log derivatives.
 
 a) For the likelihood function, $L(\beta,\tau; {\bf{y}})$, we suppose all $y_i$ are independently and identically distributed, with density function $f(y_i; \beta,\tau)$:
-\begin{eqnarray*}L(\beta,\tau; {\bf{y}})&=&\prod_{i=1}^n (2\pi e^\tau)^{-\frac{1}{2}}e^{-\frac{1}{2}e^{-\tau}(y_i-\beta x_i)^2} 
+\begin{eqnarray*}L(\beta,\tau; {\bf{y}})&=&\prod_{i=1}^n (2\pi e^\tau)^{-\frac{1}{2}}e^{-\frac{1}{2}e^{-\tau}(Y_i-\beta x_i)^2} 
 \end{eqnarray*}
 
 b) Log-Likelihood, $l(\beta,\tau)=\log\left[L(\beta,\tau; {\bf{y}})\right]$
 \begin{eqnarray*}l(\beta,\tau)&=&
-\sum_{i=1}^n \log\left[(2\pi e^\tau)^{-\frac{1}{2}}e^{-\frac{1}{2}e^{-\tau}(y_i-\beta x_i)^2}\right] \\
-&=& -\frac{n}{2}\left[\log(2\pi)+\tau\right]-\frac{e^{-\tau}}{2}\sum_{i=1}^n \left[y_i^2-2\beta x_i y_i +\beta^2 x_i^2 \right]
+\sum_{i=1}^n \log\left[(2\pi e^\tau)^{-\frac{1}{2}}e^{-\frac{1}{2}e^{-\tau}(Y_i-\beta x_i)^2}\right] \\
+&=& -\frac{n}{2}\left[\log(2\pi)+\tau\right]-\frac{e^{-\tau}}{2}\sum_{i=1}^n \left[Y_i^2-2\beta x_i Y_i +\beta^2 x_i^2 \right]
 \end{eqnarray*}
 
 c) Score function $U(\beta,\tau)=\left(\frac{\partial l(\beta,\tau)}{\partial\beta}, \frac{\partial  l(\beta,\tau)}{\partial \tau}\right)$, where
 \begin{eqnarray*}\frac{\partial}{\partial\beta}l(\beta,\tau)&=&
--\frac{ e^{-\tau}}{2}\sum_{i=1}^n \left[2\beta X_i^2 -2X_i Y_i\right]\\
-\frac{\partial}{\partial\tau}l(\beta,\tau)&=& -\frac{n}{2}+\frac{e^{-\tau}}{2}\sum_{i=1}^n \left[Y_i^2-2\beta X_i Y_i +\beta^2 x_i^2 \right]
+-\frac{ e^{-\tau}}{2}\sum_{i=1}^n \left[2\beta x_i^2 -2x_i Y_i\right]\\
+\frac{\partial}{\partial\tau}l(\beta,\tau)&=& -\frac{n}{2}+\frac{e^{-\tau}}{2}\sum_{i=1}^n \left[Y_i^2-2\beta x_i Y_i +\beta^2 x_i^2 \right]
 \end{eqnarray*}
 
 d) Observed Information $J(\beta, \tau)$, where
