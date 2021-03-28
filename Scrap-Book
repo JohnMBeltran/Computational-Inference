@@ -4,7 +4,20 @@
 
 
 
+Now, to develop a LRT, we already have the MLE of $\tau$, hence we can simply, insert this MLE value into the log-likelihood functions and derive likelihood ratio test statistic: $-2\log\left[\Lambda_{p_\beta}\right]=2\left[l_{p_\beta}(\hat\beta)-l_{p_\beta}(\beta_0)\right]$
 
+like_p_beta_0 = -(n/2)*(log(2*pi) + tau_0_hat)-(1/2)*exp(-tau_0_hat)*sum((y-beta_0*x)^2)
+like_p_beta_hat = -(n/2)*(log(2*pi)+tau_hat)-(1/2)*exp(-tau_hat)*sum((y-beta_hat*x)^2)
+LRT_stat = 2*(like_p_beta_hat - like_p_beta_0)
+
+
+\begin{eqnarray*} n\exp{\frac{c}{n}+\hat\tau} &\leq&
+\sum_{i=1}^n y_i^2 + \beta^2\sum_{i=1}^n - \beta\sum_{i=1}^n y_i x_i \\
+&\leq& \sum_{i=1}^n y_i^2 + \beta^2\sum_{i=1}^n - \beta\hat\beta\sum_{i=1}^n  x_i ^2 + 
+\left[\hat\beta\sum_{i=1}^n x_i^2 - \hat\beta\sum_{i=1}^n x_i^2  \right] \\
+&\leq& \sum_{i=1}^n y_i^2 + (\beta-\hat\beta)^2\sum_{i=1}^n x_i^2 -\hat\beta^2\sum_{i=1}^n x_i^2 \\
+\therefore \ \ \  (\beta-\hat\beta)^2 &\geq& \hat\beta^2 \frac{n\exp{\frac{c}{n}+\hat\tau} -\sum_{i=1}^n y_i^2}{\sum_{i=1}^n x_i^2}
+\end{eqnarray*}
 
 
 
